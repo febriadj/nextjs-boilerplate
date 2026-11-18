@@ -1,0 +1,23 @@
+# dependencies
+/node_modules
+
+# next.js & production
+/.next/
+/out/
+/build
+
+# testing
+/coverage
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# package manager lockfiles
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
