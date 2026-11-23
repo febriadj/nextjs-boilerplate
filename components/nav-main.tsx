@@ -1,70 +1,80 @@
 "use client";
 
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Suspense } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
 import {
     SidebarGroup,
     SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    SidebarMenuSub,
-    SidebarMenuSubButton,
-    SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { RiArrowRightSLine } from "@remixicon/react";
 
-export function NavMain({
-    items,
-}: {
+export type NavGroup = {
+    // Omit for a top-level group that needs no heading, such as Dashboard.
+    label?: string;
     items: {
         title: string;
         url: string;
-        icon?: React.ReactNode;
-        isActive?: boolean;
-        items?: {
-            title: string;
-            url: string;
-        }[];
+        icon: React.ReactNode;
     }[];
-}) {
+};
+
+// With cacheComponents, usePathname() on dynamic routes must sit inside Suspense.
+export function NavMain({ groups }: { groups: NavGroup[] }) {
     return (
-        <SidebarGroup>
-            <SidebarGroupLabel>Platform</SidebarGroupLabel>
+        <Suspense fallback={<NavGroupList groups={groups} pathname={null} />}>
+            <ActiveNavGroupList groups={groups} />
+        </Suspense>
+    );
+}
+
+function ActiveNavGroupList({ groups }: { groups: NavGroup[] }) {
+    return <NavGroupList groups={groups} pathname={usePathname()} />;
+}
+
+function NavGroupList({
+    groups,
+    pathname,
+}: {
+    groups: NavGroup[];
+    pathname: string | null;
+}) {
+    return groups.map((group) => (
+        <SidebarGroup key={group.label ?? "main"}>
+            {group.label && (
+                <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            )}
             <SidebarMenu>
-                {items.map((item) => (
-                    <Collapsible
-                        key={item.title}
-                        defaultOpen={item.isActive}
-                        className="group/collapsible"
-                        render={<SidebarMenuItem />}
-                    >
-                        <CollapsibleTrigger
-                            render={<SidebarMenuButton tooltip={item.title} />}
-                        >
-                            {item.icon}
-                            <span>{item.title}</span>
-                            <RiArrowRightSLine className="ms-auto transition-transform duration-200 group-data-open/collapsible:rotate-90" />
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                            <SidebarMenuSub>
-                                {item.items?.map((subItem) => (
-                                    <SidebarMenuSubItem key={subItem.title}>
-                                        <SidebarMenuSubButton
-                                            render={<a href={subItem.url} />}
-                                        >
-                                            <span>{subItem.title}</span>
-                                        </SidebarMenuSubButton>
-                                    </SidebarMenuSubItem>
-                                ))}
-                            </SidebarMenuSub>
-                        </CollapsibleContent>
-                    </Collapsible>
-                ))}
+                {group.items.map((item) => {
+                    const isActive =
+                        pathname !== null &&
+                        (pathname === item.url ||
+                            pathname.startsWith(`${item.url}/`));
+
+                    return (
+                        <SidebarMenuItem key={item.url}>
+                            <SidebarMenuButton
+                                isActive={isActive}
+                                tooltip={item.title}
+                                render={
+                                    <Link
+                                        href={item.url}
+                                        aria-current={
+                                            isActive ? "page" : undefined
+                                        }
+                                    />
+                                }
+                            >
+                                {item.icon}
+                                <span>{item.title}</span>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    );
+                })}
             </SidebarMenu>
         </SidebarGroup>
-    );
+    ));
 }
