@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 export default function AppHeader() {
     return (
@@ -31,6 +32,9 @@ export default function AppHeader() {
                         </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
+            </div>
+            <div className="ms-auto flex items-center gap-2 px-4">
+                <ThemeSwitcher />
             </div>
         </header>
     );
